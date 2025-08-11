@@ -25,14 +25,14 @@ def format_number(value):
             return f"{value / 1_000_000_000_000_000_000_000_000_000:.2f}N"
         elif abs_value >= 1_000_000_000_000_000_000_000_000:  # 10²⁷
             return f"{value / 1_000_000_000_000_000_000_000_000:.2f}O"
-        elif abs_value >= 1_000_000_000_000_000_000_000_000:  # 10²⁴
-            return f"{value / 1_000_000_000_000_000_000_000_000:.2f}Sp"
-        elif abs_value >= 1_000_000_000_000_000_000_000:  # 10²¹
-            return f"{value / 1_000_000_000_000_000_000_000:.2f}Sx"
-        elif abs_value >= 1_000_000_000_000_000_000:  # 10¹⁸
-            return f"{value / 1_000_000_000_000_000_000:.2f}Qt"
-        elif abs_value >= 1_000_000_000_000_000:  # 10¹⁵
-            return f"{value / 1_000_000_000_000_000:.2f}Qd"
+        elif abs_value >= 1_000_000_000_000_000_000_000:  # 10²⁴
+            return f"{value / 1_000_000_000_000_000_000_000:.2f}Sp"
+        elif abs_value >= 1_000_000_000_000_000_000:  # 10²¹
+            return f"{value / 1_000_000_000_000_000_000:.2f}Sx"
+        elif abs_value >= 1_000_000_000_000_000:  # 10¹⁸
+            return f"{value / 1_000_000_000_000_000:.2f}Qt"
+        elif abs_value >= 1_000_000_000_000:  # 10¹⁵
+            return f"{value / 1_000_000_000_000:.2f}Qd"
         elif abs_value >= 1_000_000_000_000:  # 10¹² (Triliun)
             return f"{value / 1_000_000_000_000:.2f}T"
         elif abs_value >= 1_000_000_000:  # 10⁹ (Miliar)
@@ -45,7 +45,6 @@ def format_number(value):
             return f"{value:,.0f}"
     except (ValueError, TypeError):
         return "-"
-
 
 # Load data
 @st.cache_data
@@ -79,11 +78,10 @@ def load_data(uploaded_file):
         return pd.DataFrame()
 
 # Halaman input
-# Halaman input
 def input_page():
     # Membuat 5 kolom dengan kolom tengah lebih lebar untuk logo
-    col1, col2, col3, col4, col5, col6, col7,col8,col9 = st.columns([1,1,1,1,1.2,1,1,1,1])
-    with col5:
+    col1, col2, col3, col4, col5 = st.columns([1,1,2,1,1])
+    with col3:
         st.image(logo_path, width=200, use_container_width=True)
     
     st.markdown("<h1 style='text-align: center; color: #004b8d;'>Selamat Datang</h1>", unsafe_allow_html=True)
@@ -95,11 +93,140 @@ def input_page():
         st.session_state['page'] = 'analysis'
         st.rerun()
 
-# Halaman analisis
-def analysis_page():
-    if st.button("⬅️ Kembali ke Halaman Input"):
+# Halaman keterangan singkatan angka
+def legend_page():
+    st.title("📝 Keterangan Singkatan Angka")
+    
+    st.markdown("""
+    Berikut adalah penjelasan singkatan yang digunakan dalam dashboard:
+    
+    | Singkatan | Arti               | Contoh               |
+    |-----------|--------------------|----------------------|
+    | K         | Ribu (Kilo)        | 1.000 = 1K           |
+    | Jt        | Juta (Million)     | 1.000.000 = 1Jt      |
+    | M         | Miliar (Billion)   | 1.000.000.000 = 1M   |
+    | T         | Triliun (Trillion) | 1.000.000.000.000 = 1T |
+    | Qd        | Kuadriliun         | 10¹⁵                 |
+    | Qt        | Quintiliun         | 10¹⁸                 |
+    | Sx        | Sextiliun          | 10²¹                 |
+    | Sp        | Septiliun          | 10²⁴                 |
+    | O         | Oktiliun           | 10²⁷                 |
+    | N         | Noniliun           | 10³⁰                 |
+    | D         | Desiliun           | 10³³                 |
+    """)
+    
+    if st.button("Kembali ke Menu Utama"):
         st.session_state['page'] = 'input'
         st.rerun()
+
+# Halaman perbandingan provinsi
+def comparison_page():
+    st.title("🔍 Perbandingan Antar Provinsi")
+    
+    if st.button("⬅️ Kembali ke Analisis Utama"):
+        st.session_state['page'] = 'analysis'
+        st.rerun()
+
+    if 'uploaded_file' not in st.session_state:
+        st.warning("Silakan unggah file terlebih dahulu")
+        return
+
+    df = load_data(st.session_state['uploaded_file'])
+    
+    # Pilih provinsi untuk dibandingkan
+    provinces = sorted(df['provinsi'].unique())  # Urutkan A-Z
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        prov1 = st.selectbox("Pilih Provinsi Pertama", provinces)
+    
+    with col2:
+        prov2 = st.selectbox("Pilih Provinsi Kedua", [p for p in provinces if p != prov1])
+    
+    # Filter data untuk kedua provinsi
+    df1 = df[df['provinsi'] == prov1]
+    df2 = df[df['provinsi'] == prov2]
+    
+    # Hitung metrik untuk kedua provinsi
+    def calculate_metrics(data):
+        return {
+            'Total Investasi (USD)': data['total_investasi_usd'].sum(),
+            'Total Investasi (IDR)': data['investasi_rp_juta'].sum() * 1_000_000,
+            'Jumlah Proyek': len(data),
+            'Tenaga Kerja': data['tki'].sum()
+        }
+    
+    metrics1 = calculate_metrics(df1)
+    metrics2 = calculate_metrics(df2)
+    
+    # Tampilkan metrik perbandingan
+    st.markdown("### 📊 Perbandingan Metrik Utama")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Total Investasi (USD)", 
+                 f"US$ {format_number(metrics1['Total Investasi (USD)'])}", 
+                 f"US$ {format_number(metrics2['Total Investasi (USD)'])}")
+    
+    with col2:
+        st.metric("Jumlah Proyek", 
+                 format_number(metrics1['Jumlah Proyek']), 
+                 format_number(metrics2['Jumlah Proyek']))
+    
+    with col3:
+        st.metric("Tenaga Kerja", 
+                 f"{format_number(metrics1['Tenaga Kerja'])} orang", 
+                 f"{format_number(metrics2['Tenaga Kerja'])} orang")
+    
+    # Visualisasi perbandingan
+    st.markdown("### 📈 Grafik Perbandingan")
+    
+    # Sektor usaha
+    st.markdown("#### 🏭 Perbandingan Sektor Usaha")
+    sector_comparison = pd.concat([
+        df1['nama_sektor'].value_counts().rename(prov1),
+        df2['nama_sektor'].value_counts().rename(prov2)
+    ], axis=1).fillna(0)
+    
+    top_sectors = sector_comparison.sum(axis=1).nlargest(10).index
+    sector_comparison = sector_comparison.loc[top_sectors]
+    
+    fig_sector = px.bar(
+        sector_comparison.reset_index(),
+        x='index',
+        y=[prov1, prov2],
+        barmode='group',
+        labels={'index': 'Sektor Usaha', 'value': 'Jumlah Proyek'},
+        color_discrete_sequence=['#1f77b4', '#ff7f0e']
+    )
+    st.plotly_chart(fig_sector, use_container_width=True)
+    
+    # Status investasi
+    st.markdown("#### 🧭 Perbandingan Status Investasi")
+    status_comparison = pd.concat([
+        df1['status_penanaman_modal'].value_counts().rename(prov1),
+        df2['status_penanaman_modal'].value_counts().rename(prov2)
+    ], axis=1).fillna(0)
+    
+    fig_status = px.bar(
+        status_comparison.reset_index(),
+        x='index',
+        y=[prov1, prov2],
+        barmode='group',
+        labels={'index': 'Status Investasi', 'value': 'Jumlah Proyek'},
+        color_discrete_sequence=['#2ca02c', '#d62728']
+    )
+    st.plotly_chart(fig_status, use_container_width=True)
+
+# Halaman analisis
+def analysis_page():
+    col1, col2 = st.columns([10,1])
+    with col1:
+        pass
+    with col2:
+        if st.button("⬅️ Kembali"):
+            st.session_state['page'] = 'input'
+            st.rerun()
 
     if 'uploaded_file' not in st.session_state:
         st.warning("Silakan unggah file terlebih dahulu")
@@ -111,23 +238,25 @@ def analysis_page():
     st.sidebar.image(logo_path, use_container_width=True)
     st.sidebar.title("🔍 Filter Data")
 
-    # Filter Provinsi
+    # Filter Provinsi (diurutkan A-Z)
     all_provinces = st.sidebar.checkbox("Semua Provinsi", value=True, key='all_provinces')
+    province_options = sorted(df['provinsi'].unique())  # Urutkan A-Z
+    
     if all_provinces:
         selected_provinces = st.sidebar.multiselect(
             "Provinsi", 
-            df['provinsi'].unique(), 
-            default=df['provinsi'].unique(),
+            province_options, 
+            default=province_options,
             disabled=True
         )
     else:
-        selected_provinces = st.sidebar.multiselect("Provinsi", df['provinsi'].unique())
+        selected_provinces = st.sidebar.multiselect("Provinsi", province_options)
 
     # Filter Kabupaten/Kota
     if selected_provinces:
-        kab_options = df[df['provinsi'].isin(selected_provinces)]['kabupaten_kota'].unique()
+        kab_options = sorted(df[df['provinsi'].isin(selected_provinces)]['kabupaten_kota'].unique())  # Urutkan A-Z
     else:
-        kab_options = df['kabupaten_kota'].unique()
+        kab_options = sorted(df['kabupaten_kota'].unique())  # Urutkan A-Z
 
     all_kab = st.sidebar.checkbox("Semua Kabupaten/Kota", value=True, key='all_kab')
     if all_kab:
@@ -153,12 +282,12 @@ def analysis_page():
     if all_sectors:
         selected_sectors = st.sidebar.multiselect(
             "Sektor Usaha", 
-            df['nama_sektor'].unique(), 
+            sorted(df['nama_sektor'].unique()),  # Urutkan A-Z
             default=df['nama_sektor'].unique(),
             disabled=True
         )
     else:
-        selected_sectors = st.sidebar.multiselect("Sektor Usaha", df['nama_sektor'].unique())
+        selected_sectors = st.sidebar.multiselect("Sektor Usaha", sorted(df['nama_sektor'].unique()))  # Urutkan A-Z
 
     # Filter Negara (jika kolom ada)
     if 'negara' in df.columns:
@@ -166,12 +295,12 @@ def analysis_page():
         if all_countries:
             selected_countries = st.sidebar.multiselect(
                 "Negara Asal Investasi",
-                df['negara'].unique(),
+                sorted(df['negara'].unique()),  # Urutkan A-Z
                 default=df['negara'].unique(),
                 disabled=True
             )
         else:
-            selected_countries = st.sidebar.multiselect("Negara Asal Investasi", df['negara'].unique())
+            selected_countries = st.sidebar.multiselect("Negara Asal Investasi", sorted(df['negara'].unique()))  # Urutkan A-Z
     else:
         selected_countries = None
 
@@ -220,7 +349,7 @@ def analysis_page():
     total_tki = filtered_df['tki'].sum()
     count_projects = len(filtered_df)
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.markdown(f"""
@@ -245,21 +374,27 @@ def analysis_page():
                 <h2>{format_number(count_projects)} proyek</h2>
             </div>
         """, unsafe_allow_html=True)
+    
+    with col4:
+        if st.button("🔍 Bandingkan Provinsi"):
+            st.session_state['page'] = 'comparison'
+            st.rerun()
 
     # Visualisasi
     st.markdown("---")
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📌 Distribusi Proyek", 
         "💰 Nilai Investasi", 
         "🌍 Investasi per Negara",
         "🧭 Komposisi", 
-        "📋 Detail Data"
+        "📋 Detail Data",
+        "📝 Keterangan"
     ])
 
     with tab1:
         st.markdown("### 📍 Distribusi Proyek Investasi per Provinsi")
         project_dist = filtered_df.groupby('provinsi', as_index=False).size()
-        project_dist = project_dist.sort_values('size', ascending=False)  # Urutkan dari terbesar
+        project_dist = project_dist.sort_values('provinsi')  # Urutkan A-Z
         
         fig1 = px.bar(
             project_dist,
@@ -273,8 +408,7 @@ def analysis_page():
         fig1.update_layout(
             xaxis_title="Provinsi",
             yaxis_title="Jumlah Proyek",
-            hovermode="x unified",
-            xaxis={'categoryorder':'total descending'}  # Urutkan dari terbesar
+            hovermode="x unified"
         )
         fig1.update_traces(
             texttemplate='%{text}',
@@ -290,7 +424,7 @@ def analysis_page():
             st.markdown("### 💰 Investasi dalam Rupiah (IDR)")
             rp_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_rp_juta'].sum()
             rp_investment['investasi_rp_juta'] = rp_investment['investasi_rp_juta'] * 1_000_000
-            rp_investment = rp_investment.sort_values('investasi_rp_juta', ascending=False)  # Urutkan dari terbesar
+            rp_investment = rp_investment.sort_values('provinsi')  # Urutkan A-Z
             
             fig2a = px.bar(
                 rp_investment,
@@ -308,15 +442,14 @@ def analysis_page():
             )
             fig2a.update_layout(
                 yaxis_tickprefix='Rp ',
-                yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'}  # Urutkan dari terbesar
+                yaxis_tickformat=',.0f'
             )
             st.plotly_chart(fig2a, use_container_width=True)
         
         with col2:
             st.markdown("### 💵 Investasi dalam Dolar (USD)")
             usd_investment = filtered_df.groupby('provinsi', as_index=False)['total_investasi_usd'].sum()
-            usd_investment = usd_investment.sort_values('total_investasi_usd', ascending=False)  # Urutkan dari terbesar
+            usd_investment = usd_investment.sort_values('provinsi')  # Urutkan A-Z
             
             fig2b = px.bar(
                 usd_investment,
@@ -334,8 +467,7 @@ def analysis_page():
             )
             fig2b.update_layout(
                 yaxis_tickprefix='US$ ',
-                yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'}  # Urutkan dari terbesar
+                yaxis_tickformat=',.0f'
             )
             st.plotly_chart(fig2b, use_container_width=True)
 
@@ -345,7 +477,7 @@ def analysis_page():
             
             # Investasi per negara untuk provinsi terpilih
             country_investment = filtered_df.groupby(['provinsi', 'negara'], as_index=False)['total_investasi_usd'].sum()
-            country_investment = country_investment.sort_values('total_investasi_usd', ascending=False)  # Urutkan dari terbesar
+            country_investment = country_investment.sort_values('negara')  # Urutkan A-Z
             
             fig3 = px.bar(
                 country_investment,
@@ -364,7 +496,6 @@ def analysis_page():
             fig3.update_layout(
                 yaxis_tickprefix='US$ ',
                 yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'},  # Urutkan dari terbesar
                 height=600
             )
             st.plotly_chart(fig3, use_container_width=True)
@@ -378,7 +509,6 @@ def analysis_page():
             st.markdown("### 🧭 Komposisi Status Investasi")
             status_dist = filtered_df['status_penanaman_modal'].value_counts().reset_index()
             status_dist.columns = ['status', 'count']
-            status_dist = status_dist.sort_values('count', ascending=False)  # Urutkan dari terbesar
             
             fig3a = px.pie(
                 status_dist,
@@ -398,7 +528,6 @@ def analysis_page():
             st.markdown("### 🏭 Top 10 Sektor Investasi")
             sector_dist = filtered_df['nama_sektor'].value_counts().nlargest(10).reset_index()
             sector_dist.columns = ['sektor', 'count']
-            sector_dist = sector_dist.sort_values('count', ascending=False)  # Urutkan dari terbesar
             
             fig3b = px.bar(
                 sector_dist,
@@ -416,7 +545,7 @@ def analysis_page():
                 hovertemplate='<b>%{y}</b><br>Jumlah Proyek: %{x}'
             )
             fig3b.update_layout(
-                yaxis={'categoryorder':'total ascending'}  # Urutkan dari terbesar
+                yaxis={'categoryorder':'total ascending'}
             )
             st.plotly_chart(fig3b, use_container_width=True)
 
@@ -452,6 +581,26 @@ def analysis_page():
             file_name="data_investasi_filtered.csv",
             mime="text/csv"
         )
+    
+    with tab6:
+        st.markdown("### 📝 Keterangan Singkatan Angka")
+        st.markdown("""
+        Berikut adalah penjelasan singkatan yang digunakan dalam dashboard:
+        
+        | Singkatan | Arti               | Contoh               |
+        |-----------|--------------------|----------------------|
+        | K         | Ribu (Kilo)        | 1.000 = 1K           |
+        | Jt        | Juta (Million)     | 1.000.000 = 1Jt      |
+        | M         | Miliar (Billion)   | 1.000.000.000 = 1M   |
+        | T         | Triliun (Trillion) | 1.000.000.000.000 = 1T |
+        | Qd        | Kuadriliun         | 10¹⁵                 |
+        | Qt        | Quintiliun         | 10¹⁸                 |
+        | Sx        | Sextiliun          | 10²¹                 |
+        | Sp        | Septiliun          | 10²⁴                 |
+        | O         | Oktiliun           | 10²⁷                 |
+        | N         | Noniliun           | 10³⁰                 |
+        | D         | Desiliun           | 10³³                 |
+        """)
 
 # Main
 if 'page' not in st.session_state:
@@ -459,8 +608,12 @@ if 'page' not in st.session_state:
 
 if st.session_state['page'] == 'input':
     input_page()
-else:
+elif st.session_state['page'] == 'analysis':
     analysis_page()
+elif st.session_state['page'] == 'comparison':
+    comparison_page()
+elif st.session_state['page'] == 'legend':
+    legend_page()
 
 # Footer
 st.markdown("---")
