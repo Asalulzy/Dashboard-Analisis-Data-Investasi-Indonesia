@@ -4,7 +4,7 @@ import plotly.express as px
 import openpyxl
 import os
 
-logo_path = os.path.join(os.path.dirname(__file__), "assets", "LOgo.PNG")
+logo_path = os.path.join(os.path.dirname(__file__),"LOgo.PNG")
 # Konfigurasi halaman
 st.set_page_config(
     layout="wide",
