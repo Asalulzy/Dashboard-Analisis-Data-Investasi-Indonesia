@@ -78,10 +78,9 @@ def load_data(uploaded_file):
         return pd.DataFrame()
 
 # Halaman input
-# Halaman input
 def input_page():
     # Membuat 5 kolom dengan kolom tengah lebih lebar untuk logo
-    col1, col2, col3, col4, col5, col6, col7,col8,col9 = st.columns([1,1,1,1,1.2,1,1,1,1])
+    col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns([1,1,1,1,1.2,1,1,1,1])
     with col5:
         st.image(logo_path, width=200, use_container_width=True)
     
@@ -110,36 +109,27 @@ def analysis_page():
     st.sidebar.image(logo_path, use_container_width=True)
     st.sidebar.title("🔍 Filter Data")
 
-    # Filter Provinsi
-    all_provinces = st.sidebar.checkbox("Semua Provinsi", value=True, key='all_provinces')
-    if all_provinces:
-        selected_provinces = st.sidebar.multiselect(
-            "Provinsi", 
-            df['provinsi'].unique(), 
-            default=df['provinsi'].unique(),
-            disabled=True
-        )
-    else:
-        selected_provinces = st.sidebar.multiselect("Provinsi", df['provinsi'].unique())
+    # Filter Provinsi (urut A-Z)
+    provinsi_list = sorted(df['provinsi'].dropna().unique())
+    selected_provinces = st.sidebar.multiselect(
+        "Provinsi",
+        provinsi_list,
+        default=provinsi_list
+    )
 
-    # Filter Kabupaten/Kota
+    # Filter Kabupaten/Kota (urut A-Z, berdasarkan provinsi terpilih)
     if selected_provinces:
-        kab_options = df[df['provinsi'].isin(selected_provinces)]['kabupaten_kota'].unique()
+        kab_options = sorted(df[df['provinsi'].isin(selected_provinces)]['kabupaten_kota'].dropna().unique())
     else:
-        kab_options = df['kabupaten_kota'].unique()
+        kab_options = sorted(df['kabupaten_kota'].dropna().unique())
 
-    all_kab = st.sidebar.checkbox("Semua Kabupaten/Kota", value=True, key='all_kab')
-    if all_kab:
-        selected_kab = st.sidebar.multiselect(
-            "Kabupaten/Kota", 
-            kab_options, 
-            default=kab_options,
-            disabled=True
-        )
-    else:
-        selected_kab = st.sidebar.multiselect("Kabupaten/Kota", kab_options)
+    selected_kab = st.sidebar.multiselect(
+        "Kabupaten/Kota",
+        kab_options,
+        default=kab_options
+    )
 
-    # Filter Status Investasi
+    # Filter Status Investasi (checkbox tetap)
     st.sidebar.markdown("**Status Penanaman Modal**")
     status_options = {
         'PMA': st.sidebar.checkbox("PMA (Penanaman Modal Asing)", value=True),
@@ -147,44 +137,36 @@ def analysis_page():
     }
     selected_status = [k for k, v in status_options.items() if v]
 
-    # Filter Sektor
-    all_sectors = st.sidebar.checkbox("Semua Sektor", value=True, key='all_sectors')
-    if all_sectors:
-        selected_sectors = st.sidebar.multiselect(
-            "Sektor Usaha", 
-            df['nama_sektor'].unique(), 
-            default=df['nama_sektor'].unique(),
-            disabled=True
-        )
-    else:
-        selected_sectors = st.sidebar.multiselect("Sektor Usaha", df['nama_sektor'].unique())
+    # Filter Sektor (urut A-Z)
+    sektor_list = sorted(df['nama_sektor'].dropna().unique())
+    selected_sectors = st.sidebar.multiselect(
+        "Sektor Usaha",
+        sektor_list,
+        default=sektor_list
+    )
 
-    # Filter Negara (jika kolom ada)
+    # Filter Negara (urut A-Z jika ada kolom)
     if 'negara' in df.columns:
-        all_countries = st.sidebar.checkbox("Semua Negara", value=True, key='all_countries')
-        if all_countries:
-            selected_countries = st.sidebar.multiselect(
-                "Negara Asal Investasi",
-                df['negara'].unique(),
-                default=df['negara'].unique(),
-                disabled=True
-            )
-        else:
-            selected_countries = st.sidebar.multiselect("Negara Asal Investasi", df['negara'].unique())
+        negara_list = sorted(df['negara'].dropna().unique())
+        selected_countries = st.sidebar.multiselect(
+            "Negara Asal Investasi",
+            negara_list,
+            default=negara_list
+        )
     else:
         selected_countries = None
 
-    # Filter data
+    # Filter data dengan kondisi gabungan
     filter_conditions = [
-        (df['provinsi'].isin(selected_provinces)),
-        (df['kabupaten_kota'].isin(selected_kab)),
-        (df['status_penanaman_modal'].isin(selected_status)),
-        (df['nama_sektor'].isin(selected_sectors))
+        df['provinsi'].isin(selected_provinces),
+        df['kabupaten_kota'].isin(selected_kab),
+        df['status_penanaman_modal'].isin(selected_status),
+        df['nama_sektor'].isin(selected_sectors)
     ]
-    
+
     if selected_countries is not None:
         filter_conditions.append(df['negara'].isin(selected_countries))
-    
+
     filtered_df = df[pd.concat(filter_conditions, axis=1).all(axis=1)]
 
     # Style
