@@ -205,7 +205,7 @@ def analysis_page():
     """, unsafe_allow_html=True)
 
     # Header
-    st.markdown("<h1 class='header-style'>📊 Dashboard Investasi Indonesia</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='header-style'>Dashboard Investasi Indonesia</h1>", unsafe_allow_html=True)
     st.markdown("""
         <div style='margin-bottom: 30px;'>
             Dashboard ini menampilkan data realisasi investasi di Indonesia.
