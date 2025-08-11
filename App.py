@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import openpyxl
+import os
+
 logo_path = os.path.join(os.path.dirname(__file__), "assets", "LOgo.PNG")
 # Konfigurasi halaman
 st.set_page_config(
