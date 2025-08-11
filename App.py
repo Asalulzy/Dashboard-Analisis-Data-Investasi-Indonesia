@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import openpyxl
-
+logo_path = os.path.join(os.path.dirname(__file__), "assets", "LOgo.PNG")
 # Konfigurasi halaman
 st.set_page_config(
     layout="wide",
@@ -81,7 +81,7 @@ def input_page():
     # Membuat 5 kolom dengan kolom tengah lebih lebar untuk logo
     col1, col2, col3, col4, col5, col6, col7,col8,col9 = st.columns([1,1,1,1,1.2,1,1,1,1])
     with col5:
-        st.image("assets/LOgo.PNG", width=200)
+        st.image(logo_path, width=200)
     
     st.markdown("<h1 style='text-align: center; color: #004b8d;'>Selamat Datang</h1>", unsafe_allow_html=True)
 
@@ -105,7 +105,7 @@ def analysis_page():
     df = load_data(st.session_state['uploaded_file'])
 
     # Sidebar filter
-    st.sidebar.image("assets/LOgo.PNG", use_container_width=True)
+    st.sidebar.image(logo_path, use_container_width=True)
     st.sidebar.title("🔍 Filter Data")
 
     # Filter Provinsi
