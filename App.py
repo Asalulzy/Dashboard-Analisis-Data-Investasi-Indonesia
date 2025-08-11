@@ -10,7 +10,6 @@ logo_path = os.path.join(os.path.dirname(__file__), "assets", "LOgo.png")
 st.set_page_config(
     layout="wide",
     page_title="Dashboard Investasi Indonesia",
-    page_icon="📊",
     initial_sidebar_state="expanded"
 )
 
