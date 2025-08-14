@@ -175,11 +175,6 @@ def analysis_page():
             label_visibility="collapsed"
         )
 
-    # Filter untuk tab perbandingan
-    st.sidebar.markdown("**🔎 Filter Perbandingan**")
-    compare_prov1 = st.sidebar.selectbox("Provinsi Pertama", provinsi_list, index=0)
-    compare_prov2 = st.sidebar.selectbox("Provinsi Kedua", provinsi_list, index=1 if len(provinsi_list) > 1 else 0)
-
     # Filter Kabupaten/Kota dengan opsi Pilih Semua di atas
     st.sidebar.markdown("**Kabupaten/Kota**")
     if selected_provinces:
