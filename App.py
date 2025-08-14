@@ -137,53 +137,41 @@ def analysis_page():
     st.sidebar.image(logo_path, use_container_width=True)
     st.sidebar.title("🔍 Filter Data")
 
-    # Filter Provinsi dengan opsi Pilih Semua
+        # Filter Provinsi dengan opsi Pilih Semua di atas
+    st.sidebar.markdown("**Provinsi**")
     provinsi_list = sorted(df['provinsi'].dropna().unique())
-    col1, col2 = st.sidebar.columns([1, 3])
-    with col1:
-        all_provinces = st.checkbox("Pilih Semua", key="all_provinces", value=True)
-    with col2:
-        if all_provinces:
-            selected_provinces = st.multiselect(
-                "Provinsi",
-                provinsi_list,
-                default=provinsi_list,
-                disabled=True,
-                label_visibility="collapsed"
-            )
-        else:
-            selected_provinces = st.multiselect(
-                "Provinsi",
-                provinsi_list,
-                default=provinsi_list,
-                label_visibility="collapsed"
-            )
+    all_provinces = st.sidebar.checkbox("Pilih Semua Provinsi", value=True, key="all_provinces")
+    
+    if all_provinces:
+        selected_provinces = provinsi_list
+        st.sidebar.info("Semua provinsi terpilih")
+    else:
+        selected_provinces = st.sidebar.multiselect(
+            "Pilih provinsi:",
+            provinsi_list,
+            default=provinsi_list,
+            label_visibility="collapsed"
+        )
 
-    # Filter Kabupaten/Kota dengan opsi Pilih Semua
+    # Filter Kabupaten/Kota dengan opsi Pilih Semua di atas
+    st.sidebar.markdown("**Kabupaten/Kota**")
     if selected_provinces:
         kab_options = sorted(df[df['provinsi'].isin(selected_provinces)]['kabupaten_kota'].dropna().unique())
     else:
         kab_options = sorted(df['kabupaten_kota'].dropna().unique())
     
-    col1, col2 = st.sidebar.columns([1, 3])
-    with col1:
-        all_kab = st.checkbox("Pilih Semua", key="all_kab", value=True)
-    with col2:
-        if all_kab:
-            selected_kab = st.multiselect(
-                "Kabupaten/Kota",
-                kab_options,
-                default=kab_options,
-                disabled=True,
-                label_visibility="collapsed"
-            )
-        else:
-            selected_kab = st.multiselect(
-                "Kabupaten/Kota",
-                kab_options,
-                default=kab_options,
-                label_visibility="collapsed"
-            )
+    all_kab = st.sidebar.checkbox("Pilih Semua Kabupaten/Kota", value=True, key="all_kab")
+    
+    if all_kab:
+        selected_kab = kab_options
+        st.sidebar.info("Semua kabupaten/kota terpilih")
+    else:
+        selected_kab = st.sidebar.multiselect(
+            "Pilih kabupaten/kota:",
+            kab_options,
+            default=kab_options,
+            label_visibility="collapsed"
+        )
 
     # Filter Status Investasi
     st.sidebar.markdown("**Status Penanaman Modal**")
@@ -193,50 +181,38 @@ def analysis_page():
     }
     selected_status = [k for k, v in status_options.items() if v]
 
-    # Filter Sektor dengan opsi Pilih Semua
+    # Filter Sektor dengan opsi Pilih Semua di atas
+    st.sidebar.markdown("**Sektor Usaha**")
     sektor_list = sorted(df['nama_sektor'].dropna().unique())
-    col1, col2 = st.sidebar.columns([1, 3])
-    with col1:
-        all_sectors = st.checkbox("Pilih Semua", key="all_sectors", value=True)
-    with col2:
-        if all_sectors:
-            selected_sectors = st.multiselect(
-                "Sektor Usaha",
-                sektor_list,
-                default=sektor_list,
-                disabled=True,
-                label_visibility="collapsed"
-            )
-        else:
-            selected_sectors = st.multiselect(
-                "Sektor Usaha",
-                sektor_list,
-                default=sektor_list,
-                label_visibility="collapsed"
-            )
+    all_sectors = st.sidebar.checkbox("Pilih Semua Sektor", value=True, key="all_sectors")
+    
+    if all_sectors:
+        selected_sectors = sektor_list
+        st.sidebar.info("Semua sektor terpilih")
+    else:
+        selected_sectors = st.sidebar.multiselect(
+            "Pilih sektor usaha:",
+            sektor_list,
+            default=sektor_list,
+            label_visibility="collapsed"
+        )
 
-    # Filter Negara dengan opsi Pilih Semua (jika ada kolom)
+    # Filter Negara dengan opsi Pilih Semua di atas (jika ada kolom)
     if 'negara' in df.columns:
+        st.sidebar.markdown("**Negara Asal Investasi**")
         negara_list = sorted(df['negara'].dropna().unique())
-        col1, col2 = st.sidebar.columns([1, 3])
-        with col1:
-            all_countries = st.checkbox("Pilih Semua", key="all_countries", value=True)
-        with col2:
-            if all_countries:
-                selected_countries = st.multiselect(
-                    "Negara Asal Investasi",
-                    negara_list,
-                    default=negara_list,
-                    disabled=True,
-                    label_visibility="collapsed"
-                )
-            else:
-                selected_countries = st.multiselect(
-                    "Negara Asal Investasi",
-                    negara_list,
-                    default=negara_list,
-                    label_visibility="collapsed"
-                )
+        all_countries = st.sidebar.checkbox("Pilih Semua Negara", value=True, key="all_countries")
+        
+        if all_countries:
+            selected_countries = negara_list
+            st.sidebar.info("Semua negara terpilih")
+        else:
+            selected_countries = st.sidebar.multiselect(
+                "Pilih negara:",
+                negara_list,
+                default=negara_list,
+                label_visibility="collapsed"
+            )
     else:
         selected_countries = None
 
