@@ -134,7 +134,7 @@ def analysis_page():
     st.sidebar.image(logo_path, use_container_width=True)
     st.sidebar.title("🔍 Filter Data")
 
-        # Filter Provinsi dengan opsi Pilih Semua di atas
+    # Filter Provinsi dengan opsi Pilih Semua di atas
     st.sidebar.markdown("**Provinsi**")
     provinsi_list = sorted(df['provinsi'].dropna().unique())
     all_provinces = st.sidebar.checkbox("Pilih Semua Provinsi", value=True, key="all_provinces")
@@ -236,9 +236,9 @@ def analysis_page():
     """, unsafe_allow_html=True)
 
     # Metrics
-    total_rp = filtered_df['investasi_rp_juta'].sum() * 1_000_000
-    total_usd = filtered_df['investasi_us_ribu'].sum() * 1_000
-    total_tki = filtered_df['tki'].sum()
+    total_rp = filtered_df['investasi_rp_juta'].sum() * 1_000_000 if 'investasi_rp_juta' in filtered_df.columns else 0
+    total_usd = filtered_df['investasi_us_ribu'].sum() * 1_000 if 'investasi_us_ribu' in filtered_df.columns else 0
+    total_tki = filtered_df['tki'].sum() if 'tki' in filtered_df.columns else 0
     count_projects = len(filtered_df)
 
     col1, col2, col3 = st.columns(3)
@@ -339,64 +339,71 @@ def analysis_page():
         
         with col1:
             st.markdown("### 💰 Investasi dalam Rupiah (IDR)")
-            rp_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_rp_juta'].sum()
-            rp_investment['investasi_rp_juta'] = rp_investment['investasi_rp_juta'] * 1_000_000
-            rp_investment = rp_investment.sort_values('investasi_rp_juta', ascending=False)
-            
-            fig2a = px.bar(
-                rp_investment,
-                x='provinsi',
-                y='investasi_rp_juta',
-                text='investasi_rp_juta',
-                labels={'investasi_rp_juta': 'Total Investasi (IDR)', 'provinsi': 'Provinsi'},
-                color='investasi_rp_juta',
-                color_continuous_scale='Blues'
-            )
-            fig2a.update_traces(
-                texttemplate='Rp %{text:.2s}',
-                textposition='outside',
-                hovertemplate='<b>%{x}</b><br>Investasi: Rp %{y:,.0f}'
-            )
-            fig2a.update_layout(
-                yaxis_tickprefix='Rp ',
-                yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'}
-            )
-            st.plotly_chart(fig2a, use_container_width=True)
+            if 'investasi_rp_juta' in filtered_df.columns:
+                rp_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_rp_juta'].sum()
+                rp_investment['total_investasi_rp'] = rp_investment['investasi_rp_juta'] * 1_000_000
+                rp_investment = rp_investment.sort_values('total_investasi_rp', ascending=False)
+                
+                fig2a = px.bar(
+                    rp_investment,
+                    x='provinsi',
+                    y='total_investasi_rp',
+                    text='total_investasi_rp',
+                    labels={'total_investasi_rp': 'Total Investasi (IDR)', 'provinsi': 'Provinsi'},
+                    color='total_investasi_rp',
+                    color_continuous_scale='Blues'
+                )
+                fig2a.update_traces(
+                    texttemplate='Rp %{text:.2s}',
+                    textposition='outside',
+                    hovertemplate='<b>%{x}</b><br>Investasi: Rp %{y:,.0f}'
+                )
+                fig2a.update_layout(
+                    yaxis_tickprefix='Rp ',
+                    yaxis_tickformat=',.0f',
+                    xaxis={'categoryorder':'total descending'}
+                )
+                st.plotly_chart(fig2a, use_container_width=True)
+            else:
+                st.warning("Data investasi dalam Rupiah tidak tersedia")
         
         with col2:
             st.markdown("### 💵 Investasi dalam Dolar (USD)")
-            us_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_us_ribu'].sum()
-            us_investment['investasi_us_ribu'] = us_investment['investasi_us_ribu'] * 1_000
-            
-            fig2b = px.bar(
-                usd_investment,
-                x='provinsi',
-                y='total_investasi_usd',
-                text='total_investasi_usd',
-                labels={'total_investasi_usd': 'Total Investasi (USD)', 'provinsi': 'Provinsi'},
-                color='total_investasi_usd',
-                color_continuous_scale='Greens'
-            )
-            fig2b.update_traces(
-                texttemplate='US$ %{text:.2s}',
-                textposition='outside',
-                hovertemplate='<b>%{x}</b><br>Investasi: US$ %{y:,.0f}'
-            )
-            fig2b.update_layout(
-                yaxis_tickprefix='US$ ',
-                yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'}
-            )
-            st.plotly_chart(fig2b, use_container_width=True)
+            if 'investasi_us_ribu' in filtered_df.columns:
+                usd_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_us_ribu'].sum()
+                usd_investment['total_investasi_usd'] = usd_investment['investasi_us_ribu'] * 1_000
+                usd_investment = usd_investment.sort_values('total_investasi_usd', ascending=False)
+                
+                fig2b = px.bar(
+                    usd_investment,
+                    x='provinsi',
+                    y='total_investasi_usd',
+                    text='total_investasi_usd',
+                    labels={'total_investasi_usd': 'Total Investasi (USD)', 'provinsi': 'Provinsi'},
+                    color='total_investasi_usd',
+                    color_continuous_scale='Greens'
+                )
+                fig2b.update_traces(
+                    texttemplate='US$ %{text:.2s}',
+                    textposition='outside',
+                    hovertemplate='<b>%{x}</b><br>Investasi: US$ %{y:,.0f}'
+                )
+                fig2b.update_layout(
+                    yaxis_tickprefix='US$ ',
+                    yaxis_tickformat=',.0f',
+                    xaxis={'categoryorder':'total descending'}
+                )
+                st.plotly_chart(fig2b, use_container_width=True)
+            else:
+                st.warning("Data investasi dalam USD tidak tersedia")
 
     with tab3:
-        if 'negara' in filtered_df.columns:
+        if 'negara' in filtered_df.columns and 'investasi_us_ribu' in filtered_df.columns:
             st.markdown("### 🌍 Investasi per Negara Asal")
             
             country_investment = filtered_df.groupby(['provinsi', 'negara'], as_index=False)['investasi_us_ribu'].sum()
-            country_investment['investasi_us_ribu'] = country_investment['investasi_us_ribu'] * 1_000
-            country_investment = country_investment.sort_values('investasi_us_ribu', ascending=False)
+            country_investment['total_investasi_usd'] = country_investment['investasi_us_ribu'] * 1_000
+            country_investment = country_investment.sort_values('total_investasi_usd', ascending=False)
             
             fig3 = px.bar(
                 country_investment,
@@ -427,66 +434,73 @@ def analysis_page():
         
         with col1:
             st.markdown("### 🧭 Komposisi Status Investasi")
-            status_dist = filtered_df['status_penanaman_modal'].value_counts().reset_index()
-            status_dist.columns = ['status', 'count']
-            status_dist = status_dist.sort_values('count', ascending=False)
-            
-            fig3a = px.pie(
-                status_dist,
-                names='status',
-                values='count',
-                color='status',
-                color_discrete_sequence=px.colors.qualitative.Pastel,
-                hole=0.4
-            )
-            fig3a.update_traces(
-                textinfo='percent+label',
-                hovertemplate='<b>%{label}</b><br>Jumlah: %{value} proyek<br>Persentase: %{percent}'
-            )
-            st.plotly_chart(fig3a, use_container_width=True)
+            if 'status_penanaman_modal' in filtered_df.columns:
+                status_dist = filtered_df['status_penanaman_modal'].value_counts().reset_index()
+                status_dist.columns = ['status', 'count']
+                status_dist = status_dist.sort_values('count', ascending=False)
+                
+                fig3a = px.pie(
+                    status_dist,
+                    names='status',
+                    values='count',
+                    color='status',
+                    color_discrete_sequence=px.colors.qualitative.Pastel,
+                    hole=0.4
+                )
+                fig3a.update_traces(
+                    textinfo='percent+label',
+                    hovertemplate='<b>%{label}</b><br>Jumlah: %{value} proyek<br>Persentase: %{percent}'
+                )
+                st.plotly_chart(fig3a, use_container_width=True)
+            else:
+                st.warning("Data status penanaman modal tidak tersedia")
         
         with col2:
             st.markdown("### 🏭 Top 10 Sektor Investasi")
-            sector_dist = filtered_df['nama_sektor'].value_counts().nlargest(10).reset_index()
-            sector_dist.columns = ['sektor', 'count']
-            sector_dist = sector_dist.sort_values('count', ascending=False)
-            
-            fig3b = px.bar(
-                sector_dist,
-                x='count',
-                y='sektor',
-                orientation='h',
-                text='count',
-                labels={'count': 'Jumlah Proyek', 'sektor': 'Sektor Usaha'},
-                color='count',
-                color_continuous_scale='Purples'
-            )
-            fig3b.update_traces(
-                texttemplate='%{text} proyek',
-                textposition='outside',
-                hovertemplate='<b>%{y}</b><br>Jumlah Proyek: %{x}'
-            )
-            fig3b.update_layout(
-                yaxis={'categoryorder':'total ascending'}
-            )
-            st.plotly_chart(fig3b, use_container_width=True)
+            if 'nama_sektor' in filtered_df.columns:
+                sector_dist = filtered_df['nama_sektor'].value_counts().nlargest(10).reset_index()
+                sector_dist.columns = ['sektor', 'count']
+                sector_dist = sector_dist.sort_values('count', ascending=False)
+                
+                fig3b = px.bar(
+                    sector_dist,
+                    x='count',
+                    y='sektor',
+                    orientation='h',
+                    text='count',
+                    labels={'count': 'Jumlah Proyek', 'sektor': 'Sektor Usaha'},
+                    color='count',
+                    color_continuous_scale='Purples'
+                )
+                fig3b.update_traces(
+                    texttemplate='%{text} proyek',
+                    textposition='outside',
+                    hovertemplate='<b>%{y}</b><br>Jumlah Proyek: %{x}'
+                )
+                fig3b.update_layout(
+                    yaxis={'categoryorder':'total ascending'}
+                )
+                st.plotly_chart(fig3b, use_container_width=True)
+            else:
+                st.warning("Data sektor usaha tidak tersedia")
 
     with tab5:
         st.markdown("### 📋 Tabel Data Investasi")
         
+        available_columns = [col for col in filtered_df.columns if col in filtered_df]
         show_cols = st.multiselect(
             "Pilih kolom untuk ditampilkan:",
-            options=filtered_df.columns,
+            options=available_columns,
             default=['provinsi', 'kabupaten_kota', 'nama_sektor', 'status_penanaman_modal', 
-                    'investasi_rp_juta', 'investasi_us_ribu', 'tki']
+                    'investasi_rp_juta', 'investasi_us_ribu', 'tki'] if all(col in filtered_df.columns for col in ['provinsi', 'kabupaten_kota', 'nama_sektor', 'status_penanaman_modal', 'investasi_rp_juta', 'investasi_us_ribu', 'tki']) else available_columns[:5]
         )
         
         display_df = filtered_df[show_cols].copy()
-        if 'investasi_rp_juta' in show_cols:
+        if 'investasi_rp_juta' in show_cols and 'investasi_rp_juta' in display_df.columns:
             display_df['investasi_rp_juta'] = display_df['investasi_rp_juta'].apply(lambda x: f"Rp {format_number(x)} Juta")
-        if 'investasi_us_ribu' in show_cols:
+        if 'investasi_us_ribu' in show_cols and 'investasi_us_ribu' in display_df.columns:
             display_df['investasi_us_ribu'] = display_df['investasi_us_ribu'].apply(lambda x: f"US$ {format_number(x)} Ribu")
-        if 'tki' in show_cols:
+        if 'tki' in show_cols and 'tki' in display_df.columns:
             display_df['tki'] = display_df['tki'].apply(lambda x: f"{format_number(x)} orang")
         
         st.dataframe(
