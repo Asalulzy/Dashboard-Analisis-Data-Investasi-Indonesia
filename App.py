@@ -264,8 +264,7 @@ def analysis_page():
         st.table(pd.DataFrame(legend_data))
         
         st.markdown("""
-        <div style='margin-top: 10px; color: #666; font-size: 0.9em;'>
-            <b>Catatan:</b> 
+        <div style='margin-top: 10px; color: #666; font-size: 0.9em;'> 
         </div>
         """, unsafe_allow_html=True)
 
