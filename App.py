@@ -13,6 +13,37 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Style
+st.markdown("""
+    <style>
+    .header-style {
+        color: #004b8d;
+        border-bottom: 2px solid #004b8d;
+        padding-bottom: 10px;
+    }
+    .metric-card {
+        background-color: #f0f2f6;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    /* Style untuk tabel penjelasan */
+    div[data-testid="stDataFrame"] div {
+        font-size: 0.95rem;
+    }
+    div[data-testid="stDataFrame"] table {
+        width: 100%;
+    }
+    .info-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #004b8d;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 0 5px 5px 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # Format angka
 def format_number(value):
     try:
@@ -44,7 +75,6 @@ def format_number(value):
             return f"{value:,.0f}"
     except (ValueError, TypeError):
         return "-"
-
 
 # Load data
 @st.cache_data
@@ -86,12 +116,76 @@ def input_page():
     
     st.markdown("<h1 style='text-align: center; color: #004b8d;'>Selamat Datang</h1>", unsafe_allow_html=True)
 
-    uploaded_file = st.file_uploader("Unggah file Excel data investasi", type=["xlsx", "xls"])
+    # Tambahkan menu navigasi
+    col1, col2 = st.columns(2)
+    with col1:
+        uploaded_file = st.file_uploader("Unggah file Excel data investasi", type=["xlsx", "xls"])
+        if st.button("📊 Proses Data") and uploaded_file:
+            st.session_state['uploaded_file'] = uploaded_file
+            st.session_state['page'] = 'analysis'
+            st.rerun()
+    
+    with col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("ℹ️ Penjelasan Singkatan Angka"):
+            st.session_state['page'] = 'legend'
+            st.rerun()
 
-    if st.button("Proses Data") and uploaded_file:
-        st.session_state['uploaded_file'] = uploaded_file
-        st.session_state['page'] = 'analysis'
+# Halaman penjelasan singkatan angka
+def legend_page():
+    if st.button("⬅️ Kembali ke Halaman Input"):
+        st.session_state['page'] = 'input'
         st.rerun()
+    
+    st.markdown("<h1 style='text-align: center; color: #004b8d;'>Penjelasan Singkatan Angka</h1>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class='info-box'>
+        Dashboard ini menggunakan singkatan untuk menampilkan angka yang sangat besar. 
+        Berikut adalah penjelasan lengkap untuk setiap singkatan yang digunakan:
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Tabel penjelasan
+    legend_data = [
+        {"Simbol": "K", "Nilai": "10³ (Ribu)", "Contoh": "1.500K = 1.500 ribu (1,500,000)", "Deskripsi": "Digunakan untuk nilai dalam ribuan"},
+        {"Simbol": "Jt", "Nilai": "10⁶ (Juta)", "Contoh": "2.75Jt = 2.75 juta (2,750,000)", "Deskripsi": "Digunakan untuk nilai dalam jutaan"},
+        {"Simbol": "M", "Nilai": "10⁹ (Miliar)", "Contoh": "3.50M = 3.5 miliar (3,500,000,000)", "Deskripsi": "Digunakan untuk nilai dalam miliaran"},
+        {"Simbol": "T", "Nilai": "10¹² (Triliun)", "Contoh": "4.20T = 4.2 triliun (4,200,000,000,000)", "Deskripsi": "Digunakan untuk nilai dalam triliunan"},
+        {"Simbol": "Qd", "Nilai": "10¹⁵ (Kuadriliun)", "Contoh": "1.50Qd = 1.5 kuadriliun", "Deskripsi": "Digunakan untuk nilai dalam kuadriliunan"},
+        {"Simbol": "Qt", "Nilai": "10¹⁸ (Kuantiliun)", "Contoh": "2.00Qt = 2 kuantiliun", "Deskripsi": "Digunakan untuk nilai dalam kuantiliunan"},
+        {"Simbol": "Sx", "Nilai": "10²¹ (Sekstiliun)", "Contoh": "3.50Sx = 3.5 sekstiliun", "Deskripsi": "Digunakan untuk nilai dalam sekstiliunan"},
+        {"Simbol": "Sp", "Nilai": "10²⁴ (Septiliun)", "Contoh": "1.20Sp = 1.2 septiliun", "Deskripsi": "Digunakan untuk nilai dalam septiliunan"},
+        {"Simbol": "O", "Nilai": "10²⁷ (Oktiliun)", "Contoh": "0.75O = 0.75 oktiliun", "Deskripsi": "Digunakan untuk nilai dalam oktiliunan"},
+        {"Simbol": "N", "Nilai": "10³⁰ (Noniliun)", "Contoh": "1.10N = 1.1 noniliun", "Deskripsi": "Digunakan untuk nilai dalam noniliunan"},
+        {"Simbol": "D", "Nilai": "10³³ (Desiliun)", "Contoh": "0.50D = 0.5 desiliun", "Deskripsi": "Digunakan untuk nilai dalam desiliunan"}
+    ]
+    
+    legend_df = pd.DataFrame(legend_data)
+    
+    # Tampilkan tabel dengan style
+    st.dataframe(
+        legend_df,
+        column_config={
+            "Simbol": st.column_config.TextColumn("Simbol", width="small"),
+            "Nilai": st.column_config.TextColumn("Nilai (Pangkat 10)", width="medium"),
+            "Contoh": st.column_config.TextColumn("Contoh", width="medium"),
+            "Deskripsi": st.column_config.TextColumn("Deskripsi", width="large")
+        },
+        hide_index=True,
+        use_container_width=True
+    )
+    
+    st.markdown("""
+    <div style='margin-top: 30px; color: #666; font-size: 0.9em;'>
+        <b>Catatan:</b> 
+        <ul>
+            <li>Konversi mata uang menggunakan kurs 1 USD = Rp15.000 untuk perhitungan total investasi</li>
+            <li>Format angka akan menyesuaikan secara otomatis berdasarkan besaran nilai</li>
+            <li>Untuk nilai di bawah 1.000 akan ditampilkan tanpa singkatan</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Halaman analisis
 def analysis_page():
@@ -169,23 +263,6 @@ def analysis_page():
 
     filtered_df = df[pd.concat(filter_conditions, axis=1).all(axis=1)]
 
-    # Style
-    st.markdown("""
-        <style>
-        .header-style {
-            color: #004b8d;
-            border-bottom: 2px solid #004b8d;
-            padding-bottom: 10px;
-        }
-        .metric-card {
-            background-color: #f0f2f6;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
     # Header
     st.markdown("<h1 class='header-style'>Dashboard Investasi Indonesia</h1>", unsafe_allow_html=True)
     st.markdown("""
@@ -240,7 +317,7 @@ def analysis_page():
     with tab1:
         st.markdown("### 📍 Distribusi Proyek Investasi per Provinsi")
         project_dist = filtered_df.groupby('provinsi', as_index=False).size()
-        project_dist = project_dist.sort_values('size', ascending=False)  # Urutkan dari terbesar
+        project_dist = project_dist.sort_values('size', ascending=False)
         
         fig1 = px.bar(
             project_dist,
@@ -255,7 +332,7 @@ def analysis_page():
             xaxis_title="Provinsi",
             yaxis_title="Jumlah Proyek",
             hovermode="x unified",
-            xaxis={'categoryorder':'total descending'}  # Urutkan dari terbesar
+            xaxis={'categoryorder':'total descending'}
         )
         fig1.update_traces(
             texttemplate='%{text}',
@@ -271,7 +348,7 @@ def analysis_page():
             st.markdown("### 💰 Investasi dalam Rupiah (IDR)")
             rp_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_rp_juta'].sum()
             rp_investment['investasi_rp_juta'] = rp_investment['investasi_rp_juta'] * 1_000_000
-            rp_investment = rp_investment.sort_values('investasi_rp_juta', ascending=False)  # Urutkan dari terbesar
+            rp_investment = rp_investment.sort_values('investasi_rp_juta', ascending=False)
             
             fig2a = px.bar(
                 rp_investment,
@@ -290,14 +367,14 @@ def analysis_page():
             fig2a.update_layout(
                 yaxis_tickprefix='Rp ',
                 yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'}  # Urutkan dari terbesar
+                xaxis={'categoryorder':'total descending'}
             )
             st.plotly_chart(fig2a, use_container_width=True)
         
         with col2:
             st.markdown("### 💵 Investasi dalam Dolar (USD)")
             usd_investment = filtered_df.groupby('provinsi', as_index=False)['total_investasi_usd'].sum()
-            usd_investment = usd_investment.sort_values('total_investasi_usd', ascending=False)  # Urutkan dari terbesar
+            usd_investment = usd_investment.sort_values('total_investasi_usd', ascending=False)
             
             fig2b = px.bar(
                 usd_investment,
@@ -316,7 +393,7 @@ def analysis_page():
             fig2b.update_layout(
                 yaxis_tickprefix='US$ ',
                 yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'}  # Urutkan dari terbesar
+                xaxis={'categoryorder':'total descending'}
             )
             st.plotly_chart(fig2b, use_container_width=True)
 
@@ -324,9 +401,8 @@ def analysis_page():
         if 'negara' in filtered_df.columns:
             st.markdown("### 🌍 Investasi per Negara Asal")
             
-            # Investasi per negara untuk provinsi terpilih
             country_investment = filtered_df.groupby(['provinsi', 'negara'], as_index=False)['total_investasi_usd'].sum()
-            country_investment = country_investment.sort_values('total_investasi_usd', ascending=False)  # Urutkan dari terbesar
+            country_investment = country_investment.sort_values('total_investasi_usd', ascending=False)
             
             fig3 = px.bar(
                 country_investment,
@@ -345,7 +421,7 @@ def analysis_page():
             fig3.update_layout(
                 yaxis_tickprefix='US$ ',
                 yaxis_tickformat=',.0f',
-                xaxis={'categoryorder':'total descending'},  # Urutkan dari terbesar
+                xaxis={'categoryorder':'total descending'},
                 height=600
             )
             st.plotly_chart(fig3, use_container_width=True)
@@ -359,7 +435,7 @@ def analysis_page():
             st.markdown("### 🧭 Komposisi Status Investasi")
             status_dist = filtered_df['status_penanaman_modal'].value_counts().reset_index()
             status_dist.columns = ['status', 'count']
-            status_dist = status_dist.sort_values('count', ascending=False)  # Urutkan dari terbesar
+            status_dist = status_dist.sort_values('count', ascending=False)
             
             fig3a = px.pie(
                 status_dist,
@@ -379,7 +455,7 @@ def analysis_page():
             st.markdown("### 🏭 Top 10 Sektor Investasi")
             sector_dist = filtered_df['nama_sektor'].value_counts().nlargest(10).reset_index()
             sector_dist.columns = ['sektor', 'count']
-            sector_dist = sector_dist.sort_values('count', ascending=False)  # Urutkan dari terbesar
+            sector_dist = sector_dist.sort_values('count', ascending=False)
             
             fig3b = px.bar(
                 sector_dist,
@@ -397,7 +473,7 @@ def analysis_page():
                 hovertemplate='<b>%{y}</b><br>Jumlah Proyek: %{x}'
             )
             fig3b.update_layout(
-                yaxis={'categoryorder':'total ascending'}  # Urutkan dari terbesar
+                yaxis={'categoryorder':'total ascending'}
             )
             st.plotly_chart(fig3b, use_container_width=True)
 
@@ -440,8 +516,10 @@ if 'page' not in st.session_state:
 
 if st.session_state['page'] == 'input':
     input_page()
-else:
+elif st.session_state['page'] == 'analysis':
     analysis_page()
+elif st.session_state['page'] == 'legend':
+    legend_page()
 
 # Footer
 st.markdown("---")
