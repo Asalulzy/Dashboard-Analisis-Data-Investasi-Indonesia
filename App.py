@@ -237,8 +237,7 @@ def analysis_page():
 
     # Metrics
     total_rp = filtered_df['investasi_rp_juta'].sum() * 1_000_000
-    total_us = filtered_df['investasi_us_ribu'].sum() * 1_000
-    total_usd = filtered_df['total_investasi_usd'].sum()
+    total_usd = filtered_df['investasi_us_ribu'].sum() * 1_000
     total_tki = filtered_df['tki'].sum()
     count_projects = len(filtered_df)
 
