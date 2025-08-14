@@ -97,9 +97,6 @@ def load_data(uploaded_file):
         if 'tki' in df.columns:
             df['tki'] = pd.to_numeric(df['tki'], errors='coerce').fillna(0)
 
-        if 'investasi_rp_juta' in df.columns and 'investasi_us_ribu' in df.columns:
-            df['total_investasi_usd'] = (df['investasi_rp_juta'] * 1_000_000 / 15_000) + (df['investasi_us_ribu'] * 1_000)
-
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
