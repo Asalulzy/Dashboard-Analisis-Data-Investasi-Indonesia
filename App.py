@@ -550,174 +550,174 @@ def analysis_page():
         )
 
     with tab6:
-    st.markdown("## 🆚 Perbandingan Provinsi")
-    
-    # Gunakan provinsi yang sudah difilter di sidebar
-    available_provinces = filtered_df['provinsi'].unique()
-    
-    if len(available_provinces) < 1:
-        st.warning("Tidak ada data provinsi yang tersedia berdasarkan filter saat ini")
-    else:
-        # Pilih provinsi untuk dibandingkan
-        cols = st.columns(2)
-        with cols[0]:
-            prov1 = st.selectbox("Pilih Provinsi Pertama", available_provinces, index=0)
-        with cols[1]:
-            default_idx = 1 if len(available_provinces) > 1 else 0
-            prov2 = st.selectbox("Pilih Provinsi Kedua", available_provinces, index=default_idx)
+        st.markdown("## 🆚 Perbandingan Provinsi")
         
-        # Filter data untuk masing-masing provinsi
-        df_prov1 = filtered_df[filtered_df['provinsi'] == prov1]
-        df_prov2 = filtered_df[filtered_df['provinsi'] == prov2]
+        # Gunakan provinsi yang sudah difilter di sidebar
+        available_provinces = filtered_df['provinsi'].unique()
         
-        st.markdown(f"### 🔍 Hasil Perbandingan {prov1} vs {prov2}")
-        
-        # 1. Perbandingan jumlah proyek
-        create_comparison_card(
-            "Jumlah Proyek", 
-            len(df_prov1), 
-            len(df_prov2), 
-            prov1, 
-            prov2, 
-            " proyek"
-        )
-        
-        # 2. Perbandingan total investasi USD
-        if 'investasi_us_ribu' in filtered_df.columns:
-            invest_prov1 = df_prov1['investasi_us_ribu'].sum() * 1000
-            invest_prov2 = df_prov2['investasi_us_ribu'].sum() * 1000
+        if len(available_provinces) < 1:
+            st.warning("Tidak ada data provinsi yang tersedia berdasarkan filter saat ini")
+        else:
+            # Pilih provinsi untuk dibandingkan
+            cols = st.columns(2)
+            with cols[0]:
+                prov1 = st.selectbox("Pilih Provinsi Pertama", available_provinces, index=0)
+            with cols[1]:
+                default_idx = 1 if len(available_provinces) > 1 else 0
+                prov2 = st.selectbox("Pilih Provinsi Kedua", available_provinces, index=default_idx)
+            
+            # Filter data untuk masing-masing provinsi
+            df_prov1 = filtered_df[filtered_df['provinsi'] == prov1]
+            df_prov2 = filtered_df[filtered_df['provinsi'] == prov2]
+            
+            st.markdown(f"### 🔍 Hasil Perbandingan {prov1} vs {prov2}")
+            
+            # 1. Perbandingan jumlah proyek
             create_comparison_card(
-                "Total Investasi (USD)", 
-                invest_prov1, 
-                invest_prov2, 
+                "Jumlah Proyek", 
+                len(df_prov1), 
+                len(df_prov2), 
                 prov1, 
                 prov2, 
-                " US$"
+                " proyek"
             )
-        
-        # 3. Perbandingan per sektor
-        st.markdown("### 📊 Perbandingan per Sektor Usaha")
-        if 'nama_sektor' in filtered_df.columns:
-            # Jumlah proyek per sektor
-            sector_count_prov1 = df_prov1['nama_sektor'].value_counts().reset_index()
-            sector_count_prov1.columns = ['Sektor', 'Jumlah Proyek']
-            sector_count_prov2 = df_prov2['nama_sektor'].value_counts().reset_index()
-            sector_count_prov2.columns = ['Sektor', 'Jumlah Proyek']
             
-            fig_sector = px.bar(
-                pd.concat([
-                    sector_count_prov1.assign(Provinsi=prov1),
-                    sector_count_prov2.assign(Provinsi=prov2)
-                ]),
-                x='Sektor',
-                y='Jumlah Proyek',
-                color='Provinsi',
-                barmode='group',
-                title=f"Jumlah Proyek per Sektor",
-                color_discrete_sequence=['#1f77b4', '#2ca02c']
-            )
-            st.plotly_chart(fig_sector, use_container_width=True)
-            
-            # Investasi per sektor (jika data tersedia)
+            # 2. Perbandingan total investasi USD
             if 'investasi_us_ribu' in filtered_df.columns:
-                sector_invest_prov1 = df_prov1.groupby('nama_sektor')['investasi_us_ribu'].sum().reset_index()
-                sector_invest_prov1['Investasi (USD)'] = sector_invest_prov1['investasi_us_ribu'] * 1000
-                sector_invest_prov2 = df_prov2.groupby('nama_sektor')['investasi_us_ribu'].sum().reset_index()
-                sector_invest_prov2['Investasi (USD)'] = sector_invest_prov2['investasi_us_ribu'] * 1000
-                
-                fig_invest = px.bar(
-                    pd.concat([
-                        sector_invest_prov1.assign(Provinsi=prov1),
-                        sector_invest_prov2.assign(Provinsi=prov2)
-                    ]),
-                    x='nama_sektor',
-                    y='Investasi (USD)',
-                    color='Provinsi',
-                    barmode='group',
-                    title=f"Investasi per Sektor (USD)",
-                    color_discrete_sequence=['#1f77b4', '#2ca02c']
+                invest_prov1 = df_prov1['investasi_us_ribu'].sum() * 1000
+                invest_prov2 = df_prov2['investasi_us_ribu'].sum() * 1000
+                create_comparison_card(
+                    "Total Investasi (USD)", 
+                    invest_prov1, 
+                    invest_prov2, 
+                    prov1, 
+                    prov2, 
+                    " US$"
                 )
-                fig_invest.update_layout(yaxis_tickprefix='US$ ', yaxis_tickformat=',.0f')
-                st.plotly_chart(fig_invest, use_container_width=True)
-        
-        # 4. Perbandingan TKI
-        if 'tki' in filtered_df.columns:
-            st.markdown("### 👷 Perbandingan Tenaga Kerja")
-            # Total TKI
-            total_tki_prov1 = df_prov1['tki'].sum()
-            total_tki_prov2 = df_prov2['tki'].sum()
-            create_comparison_card(
-                "Total Tenaga Kerja", 
-                total_tki_prov1, 
-                total_tki_prov2, 
-                prov1, 
-                prov2, 
-                " orang"
-            )
             
-            # TKI per sektor
+            # 3. Perbandingan per sektor
+            st.markdown("### 📊 Perbandingan per Sektor Usaha")
             if 'nama_sektor' in filtered_df.columns:
-                tki_sector_prov1 = df_prov1.groupby('nama_sektor')['tki'].sum().reset_index()
-                tki_sector_prov2 = df_prov2.groupby('nama_sektor')['tki'].sum().reset_index()
+                # Jumlah proyek per sektor
+                sector_count_prov1 = df_prov1['nama_sektor'].value_counts().reset_index()
+                sector_count_prov1.columns = ['Sektor', 'Jumlah Proyek']
+                sector_count_prov2 = df_prov2['nama_sektor'].value_counts().reset_index()
+                sector_count_prov2.columns = ['Sektor', 'Jumlah Proyek']
                 
-                fig_tki = px.bar(
+                fig_sector = px.bar(
                     pd.concat([
-                        tki_sector_prov1.assign(Provinsi=prov1),
-                        tki_sector_prov2.assign(Provinsi=prov2)
+                        sector_count_prov1.assign(Provinsi=prov1),
+                        sector_count_prov2.assign(Provinsi=prov2)
                     ]),
-                    x='nama_sektor',
-                    y='tki',
+                    x='Sektor',
+                    y='Jumlah Proyek',
                     color='Provinsi',
                     barmode='group',
-                    title="Tenaga Kerja per Sektor",
-                    labels={'tki': 'Jumlah Tenaga Kerja', 'nama_sektor': 'Sektor Usaha'},
+                    title=f"Jumlah Proyek per Sektor",
                     color_discrete_sequence=['#1f77b4', '#2ca02c']
                 )
-                st.plotly_chart(fig_tki, use_container_width=True)
-        
-        # 5. Perbandingan PMA vs PMDN
-        if 'status_penanaman_modal' in filtered_df.columns:
-            st.markdown("### 💼 Perbandingan Jenis Investasi")
-            status_counts_prov1 = df_prov1['status_penanaman_modal'].value_counts().reset_index()
-            status_counts_prov1.columns = ['Jenis', 'Jumlah Proyek']
-            status_counts_prov2 = df_prov2['status_penanaman_modal'].value_counts().reset_index()
-            status_counts_prov2.columns = ['Jenis', 'Jumlah Proyek']
-            
-            fig_status = px.bar(
-                pd.concat([
-                    status_counts_prov1.assign(Provinsi=prov1),
-                    status_counts_prov2.assign(Provinsi=prov2)
-                ]),
-                x='Jenis',
-                y='Jumlah Proyek',
-                color='Provinsi',
-                barmode='group',
-                title="Jumlah Proyek per Jenis Investasi",
-                color_discrete_sequence=['#1f77b4', '#2ca02c']
-            )
-            st.plotly_chart(fig_status, use_container_width=True)
-            
-            # Jika data investasi tersedia
-            if 'investasi_us_ribu' in filtered_df.columns:
-                status_invest_prov1 = df_prov1.groupby('status_penanaman_modal')['investasi_us_ribu'].sum().reset_index()
-                status_invest_prov1['Investasi (USD)'] = status_invest_prov1['investasi_us_ribu'] * 1000
-                status_invest_prov2 = df_prov2.groupby('status_penanaman_modal')['investasi_us_ribu'].sum().reset_index()
-                status_invest_prov2['Investasi (USD)'] = status_invest_prov2['investasi_us_ribu'] * 1000
+                st.plotly_chart(fig_sector, use_container_width=True)
                 
-                fig_status_invest = px.bar(
+                # Investasi per sektor (jika data tersedia)
+                if 'investasi_us_ribu' in filtered_df.columns:
+                    sector_invest_prov1 = df_prov1.groupby('nama_sektor')['investasi_us_ribu'].sum().reset_index()
+                    sector_invest_prov1['Investasi (USD)'] = sector_invest_prov1['investasi_us_ribu'] * 1000
+                    sector_invest_prov2 = df_prov2.groupby('nama_sektor')['investasi_us_ribu'].sum().reset_index()
+                    sector_invest_prov2['Investasi (USD)'] = sector_invest_prov2['investasi_us_ribu'] * 1000
+                    
+                    fig_invest = px.bar(
+                        pd.concat([
+                            sector_invest_prov1.assign(Provinsi=prov1),
+                            sector_invest_prov2.assign(Provinsi=prov2)
+                        ]),
+                        x='nama_sektor',
+                        y='Investasi (USD)',
+                        color='Provinsi',
+                        barmode='group',
+                        title=f"Investasi per Sektor (USD)",
+                        color_discrete_sequence=['#1f77b4', '#2ca02c']
+                    )
+                    fig_invest.update_layout(yaxis_tickprefix='US$ ', yaxis_tickformat=',.0f')
+                    st.plotly_chart(fig_invest, use_container_width=True)
+            
+            # 4. Perbandingan TKI
+            if 'tki' in filtered_df.columns:
+                st.markdown("### 👷 Perbandingan Tenaga Kerja")
+                # Total TKI
+                total_tki_prov1 = df_prov1['tki'].sum()
+                total_tki_prov2 = df_prov2['tki'].sum()
+                create_comparison_card(
+                    "Total Tenaga Kerja", 
+                    total_tki_prov1, 
+                    total_tki_prov2, 
+                    prov1, 
+                    prov2, 
+                    " orang"
+                )
+                
+                # TKI per sektor
+                if 'nama_sektor' in filtered_df.columns:
+                    tki_sector_prov1 = df_prov1.groupby('nama_sektor')['tki'].sum().reset_index()
+                    tki_sector_prov2 = df_prov2.groupby('nama_sektor')['tki'].sum().reset_index()
+                    
+                    fig_tki = px.bar(
+                        pd.concat([
+                            tki_sector_prov1.assign(Provinsi=prov1),
+                            tki_sector_prov2.assign(Provinsi=prov2)
+                        ]),
+                        x='nama_sektor',
+                        y='tki',
+                        color='Provinsi',
+                        barmode='group',
+                        title="Tenaga Kerja per Sektor",
+                        labels={'tki': 'Jumlah Tenaga Kerja', 'nama_sektor': 'Sektor Usaha'},
+                        color_discrete_sequence=['#1f77b4', '#2ca02c']
+                    )
+                    st.plotly_chart(fig_tki, use_container_width=True)
+            
+            # 5. Perbandingan PMA vs PMDN
+            if 'status_penanaman_modal' in filtered_df.columns:
+                st.markdown("### 💼 Perbandingan Jenis Investasi")
+                status_counts_prov1 = df_prov1['status_penanaman_modal'].value_counts().reset_index()
+                status_counts_prov1.columns = ['Jenis', 'Jumlah Proyek']
+                status_counts_prov2 = df_prov2['status_penanaman_modal'].value_counts().reset_index()
+                status_counts_prov2.columns = ['Jenis', 'Jumlah Proyek']
+                
+                fig_status = px.bar(
                     pd.concat([
-                        status_invest_prov1.assign(Provinsi=prov1),
-                        status_invest_prov2.assign(Provinsi=prov2)
+                        status_counts_prov1.assign(Provinsi=prov1),
+                        status_counts_prov2.assign(Provinsi=prov2)
                     ]),
-                    x='status_penanaman_modal',
-                    y='Investasi (USD)',
+                    x='Jenis',
+                    y='Jumlah Proyek',
                     color='Provinsi',
                     barmode='group',
-                    title="Investasi per Jenis Investasi (USD)",
+                    title="Jumlah Proyek per Jenis Investasi",
                     color_discrete_sequence=['#1f77b4', '#2ca02c']
                 )
-                fig_status_invest.update_layout(yaxis_tickprefix='US$ ', yaxis_tickformat=',.0f')
-                st.plotly_chart(fig_status_invest, use_container_width=True)
+                st.plotly_chart(fig_status, use_container_width=True)
+                
+                # Jika data investasi tersedia
+                if 'investasi_us_ribu' in filtered_df.columns:
+                    status_invest_prov1 = df_prov1.groupby('status_penanaman_modal')['investasi_us_ribu'].sum().reset_index()
+                    status_invest_prov1['Investasi (USD)'] = status_invest_prov1['investasi_us_ribu'] * 1000
+                    status_invest_prov2 = df_prov2.groupby('status_penanaman_modal')['investasi_us_ribu'].sum().reset_index()
+                    status_invest_prov2['Investasi (USD)'] = status_invest_prov2['investasi_us_ribu'] * 1000
+                    
+                    fig_status_invest = px.bar(
+                        pd.concat([
+                            status_invest_prov1.assign(Provinsi=prov1),
+                            status_invest_prov2.assign(Provinsi=prov2)
+                        ]),
+                        x='status_penanaman_modal',
+                        y='Investasi (USD)',
+                        color='Provinsi',
+                        barmode='group',
+                        title="Investasi per Jenis Investasi (USD)",
+                        color_discrete_sequence=['#1f77b4', '#2ca02c']
+                    )
+                    fig_status_invest.update_layout(yaxis_tickprefix='US$ ', yaxis_tickformat=',.0f')
+                    st.plotly_chart(fig_status_invest, use_container_width=True)
 
 # Main
 if 'page' not in st.session_state:
