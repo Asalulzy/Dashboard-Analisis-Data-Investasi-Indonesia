@@ -237,6 +237,7 @@ def analysis_page():
 
     # Metrics
     total_rp = filtered_df['investasi_rp_juta'].sum() * 1_000_000
+    total_us = filtered_df['investasi_us_ribu'].sum() * 1_000
     total_usd = filtered_df['total_investasi_usd'].sum()
     total_tki = filtered_df['tki'].sum()
     count_projects = len(filtered_df)
@@ -366,8 +367,8 @@ def analysis_page():
         
         with col2:
             st.markdown("### 💵 Investasi dalam Dolar (USD)")
-            usd_investment = filtered_df.groupby('provinsi', as_index=False)['total_investasi_usd'].sum()
-            usd_investment = usd_investment.sort_values('total_investasi_usd', ascending=False)
+            us_investment = filtered_df.groupby('provinsi', as_index=False)['investasi_us_ribu'].sum()
+            us_investment['investasi_us_ribu'] = us_investment['investasi_us_ribu'] * 1_000
             
             fig2b = px.bar(
                 usd_investment,
@@ -394,8 +395,9 @@ def analysis_page():
         if 'negara' in filtered_df.columns:
             st.markdown("### 🌍 Investasi per Negara Asal")
             
-            country_investment = filtered_df.groupby(['provinsi', 'negara'], as_index=False)['total_investasi_usd'].sum()
-            country_investment = country_investment.sort_values('total_investasi_usd', ascending=False)
+            country_investment = filtered_df.groupby(['provinsi', 'negara'], as_index=False)['investasi_us_ribu'].sum()
+            country_investment['investasi_us_ribu'] = country_investment['investasi_us_ribu'] * 1_000
+            country_investment = country_investment.sort_values('investasi_us_ribu', ascending=False)
             
             fig3 = px.bar(
                 country_investment,
