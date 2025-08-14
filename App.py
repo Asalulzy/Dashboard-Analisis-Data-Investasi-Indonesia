@@ -28,11 +28,9 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     /* Style untuk tabel penjelasan */
-    div[data-testid="stDataFrame"] div {
-        font-size: 0.95rem;
-    }
-    div[data-testid="stDataFrame"] table {
-        width: 100%;
+    .legend-table {
+        font-size: 0.9rem;
+        margin-top: 20px;
     }
     .info-box {
         background-color: #f8f9fa;
@@ -116,76 +114,12 @@ def input_page():
     
     st.markdown("<h1 style='text-align: center; color: #004b8d;'>Selamat Datang</h1>", unsafe_allow_html=True)
 
-    # Tambahkan menu navigasi
-    col1, col2 = st.columns(2)
-    with col1:
-        uploaded_file = st.file_uploader("Unggah file Excel data investasi", type=["xlsx", "xls"])
-        if st.button("📊 Proses Data") and uploaded_file:
-            st.session_state['uploaded_file'] = uploaded_file
-            st.session_state['page'] = 'analysis'
-            st.rerun()
-    
-    with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("ℹ️ Penjelasan Singkatan Angka"):
-            st.session_state['page'] = 'legend'
-            st.rerun()
+    uploaded_file = st.file_uploader("Unggah file Excel data investasi", type=["xlsx", "xls"])
 
-# Halaman penjelasan singkatan angka
-def legend_page():
-    if st.button("⬅️ Kembali ke Halaman Input"):
-        st.session_state['page'] = 'input'
+    if st.button("Proses Data") and uploaded_file:
+        st.session_state['uploaded_file'] = uploaded_file
+        st.session_state['page'] = 'analysis'
         st.rerun()
-    
-    st.markdown("<h1 style='text-align: center; color: #004b8d;'>Penjelasan Singkatan Angka</h1>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class='info-box'>
-        Dashboard ini menggunakan singkatan untuk menampilkan angka yang sangat besar. 
-        Berikut adalah penjelasan lengkap untuk setiap singkatan yang digunakan:
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Tabel penjelasan
-    legend_data = [
-        {"Simbol": "K", "Nilai": "10³ (Ribu)", "Contoh": "1.500K = 1.500 ribu (1,500,000)", "Deskripsi": "Digunakan untuk nilai dalam ribuan"},
-        {"Simbol": "Jt", "Nilai": "10⁶ (Juta)", "Contoh": "2.75Jt = 2.75 juta (2,750,000)", "Deskripsi": "Digunakan untuk nilai dalam jutaan"},
-        {"Simbol": "M", "Nilai": "10⁹ (Miliar)", "Contoh": "3.50M = 3.5 miliar (3,500,000,000)", "Deskripsi": "Digunakan untuk nilai dalam miliaran"},
-        {"Simbol": "T", "Nilai": "10¹² (Triliun)", "Contoh": "4.20T = 4.2 triliun (4,200,000,000,000)", "Deskripsi": "Digunakan untuk nilai dalam triliunan"},
-        {"Simbol": "Qd", "Nilai": "10¹⁵ (Kuadriliun)", "Contoh": "1.50Qd = 1.5 kuadriliun", "Deskripsi": "Digunakan untuk nilai dalam kuadriliunan"},
-        {"Simbol": "Qt", "Nilai": "10¹⁸ (Kuantiliun)", "Contoh": "2.00Qt = 2 kuantiliun", "Deskripsi": "Digunakan untuk nilai dalam kuantiliunan"},
-        {"Simbol": "Sx", "Nilai": "10²¹ (Sekstiliun)", "Contoh": "3.50Sx = 3.5 sekstiliun", "Deskripsi": "Digunakan untuk nilai dalam sekstiliunan"},
-        {"Simbol": "Sp", "Nilai": "10²⁴ (Septiliun)", "Contoh": "1.20Sp = 1.2 septiliun", "Deskripsi": "Digunakan untuk nilai dalam septiliunan"},
-        {"Simbol": "O", "Nilai": "10²⁷ (Oktiliun)", "Contoh": "0.75O = 0.75 oktiliun", "Deskripsi": "Digunakan untuk nilai dalam oktiliunan"},
-        {"Simbol": "N", "Nilai": "10³⁰ (Noniliun)", "Contoh": "1.10N = 1.1 noniliun", "Deskripsi": "Digunakan untuk nilai dalam noniliunan"},
-        {"Simbol": "D", "Nilai": "10³³ (Desiliun)", "Contoh": "0.50D = 0.5 desiliun", "Deskripsi": "Digunakan untuk nilai dalam desiliunan"}
-    ]
-    
-    legend_df = pd.DataFrame(legend_data)
-    
-    # Tampilkan tabel dengan style
-    st.dataframe(
-        legend_df,
-        column_config={
-            "Simbol": st.column_config.TextColumn("Simbol", width="small"),
-            "Nilai": st.column_config.TextColumn("Nilai (Pangkat 10)", width="medium"),
-            "Contoh": st.column_config.TextColumn("Contoh", width="medium"),
-            "Deskripsi": st.column_config.TextColumn("Deskripsi", width="large")
-        },
-        hide_index=True,
-        use_container_width=True
-    )
-    
-    st.markdown("""
-    <div style='margin-top: 30px; color: #666; font-size: 0.9em;'>
-        <b>Catatan:</b> 
-        <ul>
-            <li>Konversi mata uang menggunakan kurs 1 USD = Rp15.000 untuk perhitungan total investasi</li>
-            <li>Format angka akan menyesuaikan secara otomatis berdasarkan besaran nilai</li>
-            <li>Untuk nilai di bawah 1.000 akan ditampilkan tanpa singkatan</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
 
 # Halaman analisis
 def analysis_page():
@@ -302,6 +236,32 @@ def analysis_page():
                 <h3>Jumlah Proyek</h3>
                 <h2>{format_number(count_projects)} proyek</h2>
             </div>
+        """, unsafe_allow_html=True)
+
+    # Penjelasan singkatan angka (dalam expander)
+    with st.expander("ℹ️ Penjelasan Singkatan Angka", expanded=False):
+        st.markdown("""
+        <div class='info-box'>
+            Dashboard ini menggunakan singkatan untuk menampilkan angka yang sangat besar. 
+            Berikut penjelasan singkatan yang digunakan:
+        </div>
+        """, unsafe_allow_html=True)
+        
+        legend_data = [
+            {"Simbol": "K", "Nilai": "10³ (Ribu)", "Contoh": "1.500K = 1.500 ribu"},
+            {"Simbol": "Jt", "Nilai": "10⁶ (Juta)", "Contoh": "2.75Jt = 2.75 juta"},
+            {"Simbol": "M", "Nilai": "10⁹ (Miliar)", "Contoh": "3.50M = 3.5 miliar"},
+            {"Simbol": "T", "Nilai": "10¹² (Triliun)", "Contoh": "4.20T = 4.2 triliun"},
+            {"Simbol": "Qd", "Nilai": "10¹⁵ (Kuadriliun)", "Contoh": "1.50Qd = 1.5 kuadriliun"},
+            {"Simbol": "Qt", "Nilai": "10¹⁸ (Kuantiliun)", "Contoh": "2.00Qt = 2 kuantiliun"}
+        ]
+        
+        st.table(pd.DataFrame(legend_data))
+        
+        st.markdown("""
+        <div style='margin-top: 10px; color: #666; font-size: 0.9em;'>
+            <b>Catatan:</b> Konversi mata uang menggunakan kurs 1 USD = Rp15.000
+        </div>
         """, unsafe_allow_html=True)
 
     # Visualisasi
@@ -518,8 +478,6 @@ if st.session_state['page'] == 'input':
     input_page()
 elif st.session_state['page'] == 'analysis':
     analysis_page()
-elif st.session_state['page'] == 'legend':
-    legend_page()
 
 # Footer
 st.markdown("---")
