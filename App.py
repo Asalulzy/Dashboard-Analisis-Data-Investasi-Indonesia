@@ -248,19 +248,24 @@ def analysis_page():
         """, unsafe_allow_html=True)
         
         legend_data = [
-            {"Simbol": "K", "Nilai": "10³ (Ribu)", "Contoh": "1.500K = 1.500 ribu"},
-            {"Simbol": "Jt", "Nilai": "10⁶ (Juta)", "Contoh": "2.75Jt = 2.75 juta"},
-            {"Simbol": "M", "Nilai": "10⁹ (Miliar)", "Contoh": "3.50M = 3.5 miliar"},
-            {"Simbol": "T", "Nilai": "10¹² (Triliun)", "Contoh": "4.20T = 4.2 triliun"},
-            {"Simbol": "Qd", "Nilai": "10¹⁵ (Kuadriliun)", "Contoh": "1.50Qd = 1.5 kuadriliun"},
-            {"Simbol": "Qt", "Nilai": "10¹⁸ (Kuantiliun)", "Contoh": "2.00Qt = 2 kuantiliun"}
+            {"Simbol": "K", "Nilai": "10³ (Ribu)", "Contoh": "1.500K = 1.500 ribu (1,500,000)", "Nama": "Ribu"},
+            {"Simbol": "Jt", "Nilai": "10⁶ (Juta)", "Contoh": "2.75Jt = 2.75 juta (2,750,000)", "Nama": "Juta"},
+            {"Simbol": "M", "Nilai": "10⁹ (Miliar)", "Contoh": "3.50M = 3.5 miliar (3,500,000,000)", "Nama": "Miliar"},
+            {"Simbol": "T", "Nilai": "10¹² (Triliun)", "Contoh": "4.20T = 4.2 triliun (4,200,000,000,000)", "Nama": "Triliun"},
+            {"Simbol": "Qd", "Nilai": "10¹⁵ (Kuadriliun)", "Contoh": "1.50Qd = 1.5 kuadriliun", "Nama": "Kuadriliun"},
+            {"Simbol": "Qt", "Nilai": "10¹⁸ (Kuantiliun)", "Contoh": "2.00Qt = 2 kuantiliun", "Nama": "Kuantiliun"},
+            {"Simbol": "Sx", "Nilai": "10²¹ (Sekstiliun)", "Contoh": "3.50Sx = 3.5 sekstiliun", "Nama": "Sekstiliun"},
+            {"Simbol": "Sp", "Nilai": "10²⁴ (Septiliun)", "Contoh": "1.20Sp = 1.2 septiliun", "Nama": "Septiliun"},
+            {"Simbol": "O", "Nilai": "10²⁷ (Oktiliun)", "Contoh": "0.75O = 0.75 oktiliun", "Nama": "Oktiliun"},
+            {"Simbol": "N", "Nilai": "10³⁰ (Noniliun)", "Contoh": "1.10N = 1.1 noniliun", "Nama": "Noniliun"},
+            {"Simbol": "D", "Nilai": "10³³ (Desiliun)", "Contoh": "0.50D = 0.5 desiliun", "Nama": "Desiliun"}
         ]
         
         st.table(pd.DataFrame(legend_data))
         
         st.markdown("""
         <div style='margin-top: 10px; color: #666; font-size: 0.9em;'>
-            <b>Catatan:</b> Konversi mata uang menggunakan kurs 1 USD = Rp15.000
+            <b>Catatan:</b> 
         </div>
         """, unsafe_allow_html=True)
 
